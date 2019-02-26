@@ -3,9 +3,6 @@ ID: toooooEasy or RafaelSaddatimov
 PROG:
 */
 #include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#pragma GCC optimize("O3")
-#pragma GCC target("sse4")
 #define MAX 1009
 #define SQMAX 4048
 #define SZ (MAX / SQMAX + 1)
@@ -15,11 +12,8 @@ PROG:
 #define ll long long
 #define F first
 #define S second
-#define all(a) a.begin(), a.end()
 #define pb push_back
-#define io ios_base::sync_with_stdio(false); cin.tie(0)
 using namespace std;
-using namespace __gnu_pbds;
 vector< vector<int> > g;
 vector< set<int> > s;
 vector<int> c, res;
