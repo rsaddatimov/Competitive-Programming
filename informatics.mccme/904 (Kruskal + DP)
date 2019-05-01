@@ -1,0 +1,108 @@
+// Rafael Saddatimov
+#include <bits/stdc++.h>
+#define MAX 1005
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+using namespace std;
+int par[MAX];
+int dp[MAX][10 * MAX];
+
+struct Edge {
+    int u, v, cost, id;
+    Edge(int u, int v, int cost, int id) : u(u), v(v), cost(cost), id(id) {}
+};
+vector<Edge> res;
+vector<Edge> st;
+
+int cmp(const Edge &a, const Edge &b) {
+    return a.cost < b.cost;
+}
+int Repr(int v) {
+    if (v == par[v]) return v;
+    return par[v] = Repr(par[v]);
+}
+void Union(int x, int y) {
+    x = Repr(x);
+    y = Repr(y);
+    par[y] = x;
+}
+void getAnswer(int i, int j) {
+    if (!i) return;
+    if (dp[i - 1][j] != INF)
+        getAnswer(i - 1, j);
+    else {
+        st.push_back(res[i - 1]);
+        getAnswer(i - 1, j - res[i - 1].cost);
+    }
+}
+int main() {
+    for (int i = 0; i < MAX; i++) par[i] = i;
+    vector<Edge> E;
+    int n, m, sumL = 0, cnt = 0, p5, q5, p6, q6;
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        scanf("%d%d%d", &u, &v, &w);
+        E.push_back(Edge(u, v, w, i));
+    }
+    scanf("%d%d%d%d", &p5, &q5, &p6, &q6);
+    sort(E.begin(), E.end(), cmp);
+    for (int i = 0; i < E.size(); ++i) {
+        if (Repr(E[i].u) == Repr(E[i].v)) continue;
+        sumL += E[i].cost;
+        res.push_back(E[i]);
+        Union(E[i].u, E[i].v);
+        cnt++;
+    }
+    if (cnt != n - 1 || q5 + q6 < sumL) return 0 * puts("Impossible");
+    for (int i = 0; i < MAX; ++i) fill(dp[i], dp[i] + 10 * MAX, INF);
+    dp[0][0] = 0;
+    bool flipped = false;
+    if (p5 > p6) {
+        flipped = true;
+        swap(p5, p6);
+        swap(q5, q6);
+    }
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < 10 * MAX; ++j) {
+            dp[i + 1][j] = min(dp[i][j], dp[i + 1][j]);
+            if (j + res[i].cost < 10 * MAX && dp[i][j] != INF)
+                dp[i + 1][j + res[i].cost] = min(dp[i + 1][j + res[i].cost], dp[i][j] + res[i].cost);
+        }
+    }
+    int answer = 0;
+    for (int i = q5; i >= 0; --i) {
+        if (dp[n - 1][i] != INF) {
+            answer += i * p5;
+            if (sumL - i > q6) return 0 * puts("Impossible");
+            answer += (sumL - i) * p6;
+            getAnswer(n - 1, i);
+            break;
+        }
+    }
+    vector< pair<Edge, int> > eanswer;
+    for (int i = 0; i < n - 1; ++i) {
+        bool f = false;
+        for (int j = 0; j < st.size(); ++j) {
+            if (st[j].v == res[i].v and st[j].u == res[i].u) {
+                if (flipped)
+                    eanswer.push_back({st[j], 6});
+                else
+                    eanswer.push_back({st[j], 5});
+                f = true;
+                break;
+            }
+        }
+        if (!f) {
+            if (flipped)
+                eanswer.push_back({res[i], 5});
+            else
+                eanswer.push_back({res[i], 6});
+        }
+    }
+    printf("%d\n", answer);
+    for (int i = 0; i < n - 1; ++i)
+        printf("%d %d\n", eanswer[i].F.id, eanswer[i].S);
+}
